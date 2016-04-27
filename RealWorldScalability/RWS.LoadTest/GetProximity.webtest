@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<WebTest Name="GetProximity" Id="1f1e6468-8d9f-40af-9b6c-ba652757b0d4" Owner="" Priority="2147483647" Enabled="True" CssProjectStructure="" CssIteration="" Timeout="0" WorkItemIds="" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010" Description="" CredentialUserName="" CredentialPassword="" PreAuthenticate="True" Proxy="default" StopOnError="False" RecordedResultFile="" ResultsLocale="">
+  <Items>
+    <Request Method="GET" Guid="d3cff57d-001f-4bd8-b5f6-10344b3a1902" Version="1.1" Url="{{UrlRoot}}/api/location/GetProximity" ThinkTime="0" Timeout="300" ParseDependentRequests="True" FollowRedirects="True" RecordResult="True" Cache="False" ResponseTimeGoal="0" Encoding="utf-8" ExpectedHttpStatusCode="0" ExpectedResponseUrl="" ReportingName="" IgnoreHttpStatusCode="False">
+      <QueryStringParameters>
+        <QueryStringParameter Name="country1" Value="{{testdataGetProximity.testdataGetProximity#csv.country1}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+        <QueryStringParameter Name="state1" Value="{{testdataGetProximity.testdataGetProximity#csv.state1}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+        <QueryStringParameter Name="zipCode1" Value="{{testdataGetProximity.testdataGetProximity#csv.zipCode1}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+        <QueryStringParameter Name="country2" Value="{{testdataGetProximity.testdataGetProximity#csv.country2}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+        <QueryStringParameter Name="state2" Value="{{testdataGetProximity.testdataGetProximity#csv.state2}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+        <QueryStringParameter Name="zipCode2" Value="{{testdataGetProximity.testdataGetProximity#csv.zipCode2}}" RecordedValue="" CorrelationBinding="" UrlEncode="True" UseToGroupResults="False" />
+      </QueryStringParameters>
+    </Request>
+  </Items>
+  <DataSources>
+    <DataSource Name="testdataGetProximity" Provider="Microsoft.VisualStudio.TestTools.DataSource.CSV" Connection="|DataDirectory|\testdataGetProximity.csv">
+      <Tables>
+        <DataSourceTable Name="testdataGetProximity#csv" SelectColumns="SelectOnlyBoundColumns" AccessMethod="Sequential" />
+      </Tables>
+    </DataSource>
+  </DataSources>
+  <ContextParameters>
+    <ContextParameter Name="UrlRoot" Value="http://localhost:34350" />
+  </ContextParameters>
+</WebTest>

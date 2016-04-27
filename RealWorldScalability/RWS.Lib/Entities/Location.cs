@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace RWS.Lib.Entities
 {
     [DataContract]
-    public class Location : TableEntity
+    public class Location : BaseTableEntity
     {
         public Location()
         {

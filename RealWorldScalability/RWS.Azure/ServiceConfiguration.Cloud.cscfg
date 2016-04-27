@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="RWS.Azure" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2015-04.2.6">
+  <Role name="RWS.WebApi">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=STORAGEACCOUNTNAME;AccountKey=STORAGEACCOUNTKEY" />
+      <Setting name="AzureStorageConnectionString" value="DefaultEndpointsProtocol=https;AccountName=STORAGEACCOUNTNAME;AccountKey=STORAGEACCOUNTKEY"/>
+      <Setting name="RedisConnectionString" value="REDISSERVICENAME.redis.cache.windows.net,ssl=true,password=REDISPASSWORD"/>
+    </ConfigurationSettings>
+  </Role>
+</ServiceConfiguration>

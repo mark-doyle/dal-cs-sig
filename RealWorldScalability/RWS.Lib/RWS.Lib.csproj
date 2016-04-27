@@ -82,6 +82,7 @@
     <Compile Include="Caching\DistributedCacheService.cs" />
     <Compile Include="Configuration\ConfigurationReader.cs" />
     <Compile Include="Constants\ConfigurationKeys.cs" />
+    <Compile Include="Entities\BaseTableEntity.cs" />
     <Compile Include="Entities\LocationProximity.cs" />
     <Compile Include="Entities\PrimeCalculation.cs" />
     <Compile Include="Entities\Location.cs" />

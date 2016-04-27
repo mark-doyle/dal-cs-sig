@@ -19,6 +19,8 @@ namespace RWS.WebApi.Controllers
         private LocationProximityRepository _locationProximityRepo2;
         private LocationProximityRepository _locationProximityRepo3;
         private LocationProximityRepository _locationProximityRepo4;
+        private LocationProximityRepository _locationProximityRepo5;
+        private LocationProximityRepository _locationProximityRepo6;
 
         public LocationController()
         {
@@ -27,7 +29,83 @@ namespace RWS.WebApi.Controllers
             _locationProximityRepo2 = new LocationProximityRepository("LocationProximity2");
             _locationProximityRepo3 = new LocationProximityRepository("LocationProximity3");
             _locationProximityRepo4 = new LocationProximityRepository("LocationProximity4");
+            _locationProximityRepo5 = new LocationProximityRepository("LocationProximity5");
+            _locationProximityRepo6 = new LocationProximityRepository("LocationProximity6");
         }
+
+        #region Helpers
+
+        private string _GetLocationProximityCacheKey(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2, bool isAsync)
+        {
+            return string.Format("_LocProx{6}-{0}.{1}.{2}-{3}.{4}.{5}",
+                country1, state1, zipCode1, country2, state2, zipCode2, (isAsync ? "Async" : "")
+                );
+        }
+
+        private LocationProximity _GetCachedLocationProximity(LocationProximityRepository repo, string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        {
+            string key = _GetLocationProximityCacheKey(country1, state1, zipCode1, country2, state2, zipCode2, false);
+            return InMemoryCacheService.GetCachedItem<LocationProximity>(key, () =>
+            {
+                return repo.GetLocationProximity(country1, state1, zipCode1, country2, state2, zipCode2);
+            });
+        }
+
+        private async Task<LocationProximity> _GetCachedLocationProximityAsync(LocationProximityRepository repo, string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        {
+            string key = _GetLocationProximityCacheKey(country1, state1, zipCode1, country2, state2, zipCode2, true);
+            return await InMemoryCacheService.GetCachedItemAsync<LocationProximity>(key, async () =>
+            {
+                return await repo.GetLocationProximityAsync(country1, state1, zipCode1, country2, state2, zipCode2);
+            });
+        }
+
+        private void _CacheAndSaveLocationProximity(LocationProximityRepository repo, LocationProximity locationProximity)
+        {
+            string key = _GetLocationProximityCacheKey(
+                locationProximity.SourceCountry, locationProximity.SourceState, locationProximity.SourceZipCode,
+                locationProximity.DestinationCountry, locationProximity.DestinationState, locationProximity.DestinationZipCode,
+                false);
+            InMemoryCacheService.AddItem(locationProximity, key);
+            repo.SaveLocationProximity(locationProximity);
+        }
+
+        private async Task _CacheAndSaveLocationProximityAsync(LocationProximityRepository repo, LocationProximity locationProximity)
+        {
+            string key = _GetLocationProximityCacheKey(
+                locationProximity.SourceCountry, locationProximity.SourceState, locationProximity.SourceZipCode,
+                locationProximity.DestinationCountry, locationProximity.DestinationState, locationProximity.DestinationZipCode,
+                true);
+            await Task.WhenAll(
+                InMemoryCacheService.AddItemAsync(locationProximity, key),
+                repo.SaveLocationProximityAsync(locationProximity)
+                );
+        }
+
+        private List<Location> _GetAllLocationsCached()
+        {
+            return InMemoryCacheService.GetCachedItem<List<Location>>("AllLocations", () =>
+            {
+                return _locationRepo.GetAllLocations();
+            });
+        }
+
+        private async Task<List<Location>> _GetAllLocationsCachedAsync()
+        {
+            return await InMemoryCacheService.GetCachedItemAsync<List<Location>>("AllLocationsAsync", async () =>
+            {
+                return await _locationRepo.GetAllLocationsAsync();
+            });
+        }
+
+        private string _GetRelativeLocationCacheKey(string country, string state, string zipCode, int limit, bool isAsync)
+        {
+            return string.Format("_RelLoc{4}-{0}.{1}.{2}-{3}",
+                country, state, zipCode, limit.ToString(), (isAsync ? "Async" : "")
+                );
+        }
+
+        #endregion // Helpers
 
         #region Distance calculation, no result caching or storage
 
@@ -132,57 +210,6 @@ namespace RWS.WebApi.Controllers
 
         #region Distance calculation, stored and in-mem cached results
 
-        #region Helpers
-
-        private string _GetLocationProximityCacheKey(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2, bool isAsync)
-        {
-            return string.Format("_LocProx{6}-{0}.{1}.{2}-{3}.{4}.{5}",
-                country1, state1, zipCode1, country2, state2, zipCode2, (isAsync ? "Async" : "")
-                );
-        }
-
-        private LocationProximity _GetCachedLocationProximity(LocationProximityRepository repo, string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
-        {
-            string key = _GetLocationProximityCacheKey(country1, state1, zipCode1, country2, state2, zipCode2, false);
-            return InMemoryCacheService.GetCachedItem<LocationProximity>(key, () =>
-            {
-                return repo.GetLocationProximity(country1, state1, zipCode1, country2, state2, zipCode2);
-            });
-        }
-
-        private async Task<LocationProximity> _GetCachedLocationProximityAsync(LocationProximityRepository repo, string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
-        {
-            string key = _GetLocationProximityCacheKey(country1, state1, zipCode1, country2, state2, zipCode2, true);
-            return await InMemoryCacheService.GetCachedItemAsync<LocationProximity>(key, async () =>
-            {
-                return await repo.GetLocationProximityAsync(country1, state1, zipCode1, country2, state2, zipCode2);
-            });
-        }
-
-        private void _CacheAndSaveLocationProximity(LocationProximityRepository repo, LocationProximity locationProximity)
-        {
-            string key = _GetLocationProximityCacheKey(
-                locationProximity.SourceCountry, locationProximity.SourceState, locationProximity.SourceZipCode,
-                locationProximity.DestinationCountry, locationProximity.DestinationState, locationProximity.DestinationZipCode, 
-                false);
-            InMemoryCacheService.AddItem(locationProximity, key);
-            repo.SaveLocationProximity(locationProximity);
-        }
-
-        private async Task _CacheAndSaveLocationProximityAsync(LocationProximityRepository repo, LocationProximity locationProximity)
-        {
-            string key = _GetLocationProximityCacheKey(
-                locationProximity.SourceCountry, locationProximity.SourceState, locationProximity.SourceZipCode,
-                locationProximity.DestinationCountry, locationProximity.DestinationState, locationProximity.DestinationZipCode,
-                true);
-            await Task.WhenAll(
-                InMemoryCacheService.AddItemAsync(locationProximity, key),
-                repo.SaveLocationProximityAsync(locationProximity)
-                );
-        }
-
-        #endregion // Helpers
-
         [HttpGet]
         [ActionName("GetCachedStoredProximity")]
         public LocationProximity GetCachedStoredProximity(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
@@ -239,27 +266,62 @@ namespace RWS.WebApi.Controllers
 
         #endregion // Distance calculation, stored and in-mem cached results
 
+        #region Distance calculation, stored and in-mem cached results & all locations
+
+        [HttpGet]
+        [ActionName("GetCachedStoredProximity2")]
+        public LocationProximity GetCachedStoredProximity2(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        {
+            LocationProximity locationProximity = _GetCachedLocationProximity(_locationProximityRepo5, country1, state1, zipCode1, country2, state2, zipCode2);
+            if (locationProximity == null)
+            {
+                List<Location> allLocations = _GetAllLocationsCached();
+                Location location1 = allLocations.FirstOrDefault(loc => loc.Country == country1 && loc.State == state1 && loc.ZipCode == zipCode1);
+                Location location2 = allLocations.FirstOrDefault(loc => loc.Country == country2 && loc.State == state2 && loc.ZipCode == zipCode2);
+                if (location1 != null && location2 != null)
+                {
+                    double distance = DistanceCalculator.GetDistanceInMiles(location1.Latitude, location1.Longitude, location2.Latitude, location2.Longitude);
+                    locationProximity = new LocationProximity(location1, location2, distance);
+                    LocationProximity reversed = new LocationProximity(location2, location1, distance);
+
+                    _CacheAndSaveLocationProximity(_locationProximityRepo5, locationProximity);
+                    _CacheAndSaveLocationProximity(_locationProximityRepo5, reversed);
+                }
+            }
+
+            return locationProximity;
+        }
+
+        [HttpGet]
+        [ActionName("GetCachedStoredProximity2Async")]
+        public async Task<LocationProximity> GetCachedStoredProximity2Async(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        {
+            LocationProximity locationProximity = await _GetCachedLocationProximityAsync(_locationProximityRepo6, country1, state1, zipCode1, country2, state2, zipCode2);
+            if (locationProximity == null)
+            {
+                List<Location> allLocations = await _GetAllLocationsCachedAsync();
+                Location location1 = allLocations.FirstOrDefault(loc => loc.Country == country1 && loc.State == state1 && loc.ZipCode == zipCode1);
+                Location location2 = allLocations.FirstOrDefault(loc => loc.Country == country2 && loc.State == state2 && loc.ZipCode == zipCode2);
+
+                if (location1 != null && location2 != null)
+                {
+                    double distance = DistanceCalculator.GetDistanceInMiles(location1.Latitude, location1.Longitude, location2.Latitude, location2.Longitude);
+                    locationProximity = new LocationProximity(location1, location2, distance);
+                    LocationProximity reversed = new LocationProximity(location2, location1, distance);
+
+                    await Task.WhenAll(
+                        _CacheAndSaveLocationProximityAsync(_locationProximityRepo6, locationProximity),
+                        _CacheAndSaveLocationProximityAsync(_locationProximityRepo6, reversed)
+                        );
+                }
+            }
+
+            return locationProximity;
+        }
+
+        #endregion // Distance calculation, stored and in-mem cached results & all locations
+
         #region Relative distance calculation, no storage or caching of results
-
-        #region Helpers
-
-        private List<Location> _GetAllLocationsCached()
-        {
-            return InMemoryCacheService.GetCachedItem<List<Location>>("AllLocations", () =>
-            {
-                return _locationRepo.GetAllLocations();
-            });
-        }
-
-        private async Task<List<Location>> _GetAllLocationsCachedAsync()
-        {
-            return await InMemoryCacheService.GetCachedItemAsync<List<Location>>("AllLocations", async () =>
-            {
-                return await _locationRepo.GetAllLocationsAsync();
-            });
-        }
-
-        #endregion // Helpers
 
         [HttpGet]
         [ActionName("GetNearest")]
@@ -312,17 +374,6 @@ namespace RWS.WebApi.Controllers
         #endregion // Relative distance calculation, no storage or caching of results
 
         #region Relative distance calculation, using distributed caching of results
-
-        #region Helpers
-
-        private string _GetRelativeLocationCacheKey(string country, string state, string zipCode, int limit, bool isAsync)
-        {
-            return string.Format("_RelLoc{4}-{0}.{1}.{2}-{3}",
-                country, state, zipCode, limit.ToString(), (isAsync ? "Async" : "")
-                );
-        }
-
-        #endregion // Helpers
 
         [HttpGet]
         [ActionName("GetNearestCached")]
