@@ -153,8 +153,8 @@ namespace RWS.WebApi.Controllers
         #region Distance calculation, stored results but no caching
 
         [HttpGet]
-        [ActionName("GetStoredProximity")]
-        public LocationProximity GetStoredProximity(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityStored")]
+        public LocationProximity GetProximityStored(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = _locationProximityRepo1.GetLocationProximity(country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
@@ -176,8 +176,8 @@ namespace RWS.WebApi.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetStoredProximityAsync")]
-        public async Task<LocationProximity> GetStoredProximityAsync(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityStoredAsync")]
+        public async Task<LocationProximity> GetProximityStoredAsync(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = await _locationProximityRepo2.GetLocationProximityAsync(country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
@@ -211,8 +211,8 @@ namespace RWS.WebApi.Controllers
         #region Distance calculation, stored and in-mem cached results
 
         [HttpGet]
-        [ActionName("GetCachedStoredProximity")]
-        public LocationProximity GetCachedStoredProximity(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityCachedStored")]
+        public LocationProximity GetProximityCachedStored(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = _GetCachedLocationProximity(_locationProximityRepo3, country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
@@ -234,8 +234,8 @@ namespace RWS.WebApi.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetCachedStoredProximityAsync")]
-        public async Task<LocationProximity> GetCachedStoredProximityAsync(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityCachedStoredAsync")]
+        public async Task<LocationProximity> GetProximityCachedStoredAsync(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = await _GetCachedLocationProximityAsync(_locationProximityRepo4, country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
@@ -269,8 +269,8 @@ namespace RWS.WebApi.Controllers
         #region Distance calculation, stored and in-mem cached results & all locations
 
         [HttpGet]
-        [ActionName("GetCachedStoredProximity2")]
-        public LocationProximity GetCachedStoredProximity2(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityCachedStored2")]
+        public LocationProximity GetProximityCachedStored2(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = _GetCachedLocationProximity(_locationProximityRepo5, country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
@@ -293,8 +293,8 @@ namespace RWS.WebApi.Controllers
         }
 
         [HttpGet]
-        [ActionName("GetCachedStoredProximity2Async")]
-        public async Task<LocationProximity> GetCachedStoredProximity2Async(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        [ActionName("GetProximityCachedStored2Async")]
+        public async Task<LocationProximity> GetProximityCachedStored2Async(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = await _GetCachedLocationProximityAsync(_locationProximityRepo6, country1, state1, zipCode1, country2, state2, zipCode2);
             if (locationProximity == null)
