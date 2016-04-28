@@ -5,7 +5,7 @@
       <ThinkProfile Value="0" Pattern="Off" />
       <LoadProfile Pattern="Step" InitialUsers="1" MaxUsers="25" StepUsers="1" StepDuration="10" StepRampTime="0" />
       <TestMix>
-        <TestProfile Name="GetProximity" Path="getproximity.webtest" Id="e2172e31-a64a-4636-92d1-93d2ef6f8f96" Percentage="100" Type="Microsoft.VisualStudio.TestTools.WebStress.DeclarativeWebTestElement, Microsoft.VisualStudio.QualityTools.LoadTest, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+        <TestProfile Name="GetProximity" Path="getproximity.webtest" Id="1f1e6468-8d9f-40af-9b6c-ba652757b0d4" Percentage="100" Type="Microsoft.VisualStudio.TestTools.WebStress.DeclarativeWebTestElement, Microsoft.VisualStudio.QualityTools.LoadTest, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
       </TestMix>
       <BrowserMix>
         <BrowserProfile Percentage="100">

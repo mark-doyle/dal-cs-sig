@@ -16,6 +16,6 @@
     </DataSource>
   </DataSources>
   <ContextParameters>
-    <ContextParameter Name="UrlRoot" Value="http://localhost:34350" />
+    <ContextParameter Name="UrlRoot" Value="http://dalcssigrws.cloudapp.net" />
   </ContextParameters>
 </WebTest>
