@@ -21,6 +21,8 @@ namespace RWS.WebApi.Controllers
         private LocationProximityRepository _locationProximityRepo4;
         private LocationProximityRepository _locationProximityRepo5;
         private LocationProximityRepository _locationProximityRepo6;
+        private LocationProximityRepository _locationProximityRepo7;
+        private LocationProximityRepository _locationProximityRepo8;
 
         public LocationController()
         {
@@ -31,6 +33,8 @@ namespace RWS.WebApi.Controllers
             _locationProximityRepo4 = new LocationProximityRepository("LocationProximity4");
             _locationProximityRepo5 = new LocationProximityRepository("LocationProximity5");
             _locationProximityRepo6 = new LocationProximityRepository("LocationProximity6");
+            _locationProximityRepo7 = new LocationProximityRepository("LocationProximity7");
+            _locationProximityRepo8 = new LocationProximityRepository("LocationProximity8");
         }
 
         #region Helpers
@@ -357,11 +361,9 @@ namespace RWS.WebApi.Controllers
 
             if (current != null)
             {
-                nearest = (await Task.WhenAll(
-                    locations
+                nearest = locations
                     .Where(loc => !(loc.Country == country && loc.State == state && loc.ZipCode == zipCode))
-                    .Select(loc => Task.Run(() => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0)))
-                    ))
+                    .Select(loc => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0))
                     .OrderBy(loc => loc.Distance)
                     .Take(limit)
                     .ToList();
@@ -416,11 +418,9 @@ namespace RWS.WebApi.Controllers
 
                 if (current != null)
                 {
-                    nearest = (await Task.WhenAll(
-                        locations
+                    nearest = locations
                         .Where(loc => !(loc.Country == country && loc.State == state && loc.ZipCode == zipCode))
-                        .Select(loc => Task.Run(() => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0)))
-                        ))
+                        .Select(loc => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0))
                         .OrderBy(loc => loc.Distance)
                         .Take(limit)
                         .ToList();
@@ -432,6 +432,45 @@ namespace RWS.WebApi.Controllers
         }
 
         #endregion // Relative distance calculation, using distributed caching of results
+
+        #region Proximity calculation and for all locations, no caching or storage verification
+
+        [HttpGet]
+        [ActionName("CalculateAllProximities")]
+        public int CalculateAllProximities(int takeFromSource, int takeFromDestination)
+        {
+            List<Location> locations = _locationRepo.GetAllLocations();
+            foreach (var source in locations.Take(takeFromSource))
+            {
+                List<LocationProximity> proximityBatch = new List<LocationProximity>();
+                foreach (var destination in locations.Skip(takeFromSource).Take(takeFromDestination))
+                {
+                    double distance = DistanceCalculator.GetDistanceInMiles(source.Latitude, source.Longitude, destination.Latitude, destination.Longitude);
+                    proximityBatch.Add(new LocationProximity(source, destination, distance));
+                }
+                _locationProximityRepo7.SaveLocationProximities(proximityBatch);
+            }
+            return takeFromSource;
+        }
+
+        [HttpGet]
+        [ActionName("CalculateAllProximitiesAsync")]
+        public async Task<int> CalculateAllProximitiesAsync(int takeFromSource, int takeFromDestination)
+        {
+            List<Location> locations = await _locationRepo.GetAllLocationsAsync();
+            await Task.WhenAll(locations.Take(takeFromSource).Select(async source => {
+                List<LocationProximity> proximityBatch = new List<LocationProximity>();
+                foreach (var destination in locations.Skip(takeFromSource).Take(takeFromDestination))
+                {
+                    double distance = DistanceCalculator.GetDistanceInMiles(source.Latitude, source.Longitude, destination.Latitude, destination.Longitude);
+                    proximityBatch.Add(new LocationProximity(source, destination, distance));
+                }
+                await _locationProximityRepo8.SaveLocationProximitiesAsync(proximityBatch);
+            }));
+            return takeFromSource;
+        }
+
+        #endregion // Proximity calculation and for all locations, no caching or storage verification
 
     }
 }

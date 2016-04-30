@@ -46,5 +46,15 @@ namespace RWS.Lib.Storage
             await _locationProximityStorage.UpsertEntityAsync(locationProximity);
         }
 
+        public void SaveLocationProximities(List<LocationProximity> batch)
+        {
+            _locationProximityStorage.UpsertBatch(batch);
+        }
+
+        public async Task SaveLocationProximitiesAsync(List<LocationProximity> batch)
+        {
+            await _locationProximityStorage.UpsertBatchAsync(batch);
+        }
+
     }
 }
