@@ -11,29 +11,29 @@ namespace RWS.Lib.Caching
     {
         private static readonly ObjectCache __CACHE = MemoryCache.Default;
 
-        public static void AddItem(object objectToCache, string key, double minutesToCache = 10, int databaseIndex = 0)
+        public static void AddItem(object objectToCache, string key, double minutesToCache = 10)
         {
             if (objectToCache != null)
                 __CACHE.Add(key, objectToCache, DateTime.UtcNow.AddMinutes(minutesToCache));
         }
 
-        public static async Task AddItemAsync(object objectToCache, string key, double minutesToCache = 10, int databaseIndex = 0)
+        public static async Task AddItemAsync(object objectToCache, string key, double minutesToCache = 10)
         {
-            await Task.Run(() => AddItem(objectToCache, key, minutesToCache, databaseIndex));
+            await Task.Run(() => AddItem(objectToCache, key, minutesToCache));
         }
 
-        public static void DeleteItem(string key, int databaseIndex = 0)
+        public static void DeleteItem(string key)
         {
             if (__CACHE.Contains(key))
                 __CACHE.Remove(key);
         }
 
-        public static async Task DeleteItemAsync(string key, int databaseIndex = 0)
+        public static async Task DeleteItemAsync(string key)
         {
             await Task.Run(() => DeleteItem(key));
         }
 
-        public static T GetCachedItem<T>(string key, Func<T> fallback = null, double fallbackMinutesToCache = 10, int databaseIndex = 0) where T : class
+        public static T GetCachedItem<T>(string key, Func<T> fallback = null, double fallbackMinutesToCache = 10) where T : class
         {
             try
             {
@@ -41,7 +41,7 @@ namespace RWS.Lib.Caching
                 if (result == null)
                 {
                     result = fallback();
-                    AddItem(result, key, fallbackMinutesToCache, databaseIndex);
+                    AddItem(result, key, fallbackMinutesToCache);
                 }
                 return result;
             }
@@ -51,7 +51,7 @@ namespace RWS.Lib.Caching
             }
         }
 
-        public static async Task<T> GetCachedItemAsync<T>(string key, Func<Task<T>> fallback = null, double fallbackMinutesToCache = 10, int databaseIndex = 0) where T : class
+        public static async Task<T> GetCachedItemAsync<T>(string key, Func<Task<T>> fallback = null, double fallbackMinutesToCache = 10) where T : class
         {
             try
             {
@@ -59,7 +59,7 @@ namespace RWS.Lib.Caching
                 if (result == null)
                 {
                     result = await fallback();
-                    await AddItemAsync(result, key, fallbackMinutesToCache, databaseIndex);
+                    await AddItemAsync(result, key, fallbackMinutesToCache);
                 }
                 return result;
             }

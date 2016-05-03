@@ -115,7 +115,8 @@ namespace RWS.WebApi.Controllers
 
         [HttpGet]
         [ActionName("GetProximity")]
-        public LocationProximity GetProximity(string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
+        public LocationProximity GetProximity(
+            string country1, string state1, string zipCode1, string country2, string state2, string zipCode2)
         {
             LocationProximity locationProximity = null;
 
@@ -123,7 +124,8 @@ namespace RWS.WebApi.Controllers
             Location location2 = _locationRepo.GetLocation(country2, state2, zipCode2);
             if (location1 != null && location2 != null)
             {
-                double distance = DistanceCalculator.GetDistanceInMiles(location1.Latitude, location1.Longitude, location2.Latitude, location2.Longitude);
+                double distance = DistanceCalculator.GetDistanceInMiles(
+                    location1.Latitude, location1.Longitude, location2.Latitude, location2.Longitude);
                 locationProximity = new LocationProximity(location1, location2, distance);
             }
 
@@ -340,7 +342,8 @@ namespace RWS.WebApi.Controllers
             {
                 nearest = locations
                     .Where(loc => !(loc.Country == country && loc.State == state && loc.ZipCode == zipCode))
-                    .Select(loc => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0))
+                    .Select(loc => new RelativeLocation(loc, DistanceCalculator.GetDistanceInMiles(
+                        current.Latitude, current.Longitude, loc.Latitude, loc.Longitude), 0))
                     .OrderBy(loc => loc.Distance)
                     .Take(limit)
                     .ToList();
@@ -445,7 +448,8 @@ namespace RWS.WebApi.Controllers
                 List<LocationProximity> proximityBatch = new List<LocationProximity>();
                 foreach (var destination in locations.Skip(takeFromSource).Take(takeFromDestination))
                 {
-                    double distance = DistanceCalculator.GetDistanceInMiles(source.Latitude, source.Longitude, destination.Latitude, destination.Longitude);
+                    double distance = DistanceCalculator.GetDistanceInMiles(
+                        source.Latitude, source.Longitude, destination.Latitude, destination.Longitude);
                     proximityBatch.Add(new LocationProximity(source, destination, distance));
                 }
                 _locationProximityRepo7.SaveLocationProximities(proximityBatch);
